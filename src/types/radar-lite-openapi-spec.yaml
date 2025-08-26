@@ -1,0 +1,1861 @@
+openapi: 3.0.0
+info:
+  license:
+    name: Proprietary
+    url: https://api.radar.airtrafficcontrol.io/license
+  title: Air Traffic Control Radar API
+  version: 1.0.0
+servers:
+  - url: 'https://radar-api.atcdev.io'
+  - url: 'https://radar-api.airtrafficcontrol.io'
+security:
+  - bearerAuth: []
+paths:
+  /auth/user:
+    post:
+      tags:
+        - Auth
+      operationId: createUser
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+      responses:
+        '204':
+          description: User created successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      operationId: initiateLogin
+      summary: Initiate passwordless login with email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+      responses:
+        '204':
+          description: One-time password sent successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /auth/verify:
+    post:
+      tags:
+        - Auth  
+      operationId: verifyOtp
+      summary: Verify one-time password and get JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - otp
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                otp:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                properties:
+                  token:
+                    type: string
+                    example: "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /account/{id}:
+    get:
+      tags:
+        - Account
+      operationId: getAccount
+      summary: Get account details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "123"
+                  name:
+                    type: string
+                    example: "Acme"
+                  status:
+                    type: object
+                    properties:
+                      progress:
+                        type: number
+                        example: 50
+                        minimum: 0
+                        maximum: 100
+                      label:
+                        type: string
+                        enum:
+                          - "PROFILE-IN-PROGRESS"
+                          - "PERSONALIZATION-IN-PROGRESS"
+                          - "RADAR-CALIBRATION-IN-PROGRESS"
+          '400':
+            $ref: '#/components/responses/BadRequest'
+          '401':
+            $ref: '#/components/responses/Unauthorized'
+          '403':
+            $ref: '#/components/responses/Forbidden'
+          '422':
+            $ref: '#/components/responses/TooManyRequests'
+          '500':
+            $ref: '#/components/responses/InternalServerError'
+          default:
+            $ref: '#/components/responses/Error'
+  /competitors:
+    get:
+      tags:
+        - Competitors
+      operationId: getCompetitorDetails
+      summary: Get a competitors details
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompetitorDetails'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+    post: 
+      tags:
+        - Competitors
+      operationId: createCompetitorDetails
+      summary: Create a competitors details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitorDetails'
+      responses:
+        '204':
+          description: Successful operation
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+  /competitors/{id}:
+    put:
+      tags:
+        - Competitors
+      operationId: updateCompetitorDetails
+      summary: Update a competitors details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitorDetails'
+      responses:
+        '204':
+          description: Successful operation
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /topics/audienceRelevance:
+    get:
+      tags:
+        - Topics
+      operationId: getTopicAudienceRelevance
+      summary: Retrieve the Orgs topics audience relevance
+      parameters:
+        - in: query
+          name: filter
+          schema:
+            type: object
+            properties:
+              listId:
+                $ref: '#/components/schemas/ContactListId'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The audience relevance metrics
+                properties:
+                  none:
+                    type: number
+                    description: number of topics in this category
+                    example: 1
+                  low:
+                    type: number
+                    description: number of topics in this category
+                    example: 2
+                  medium:
+                    type: number
+                    description: number of topics in this category
+                    example: 3
+                  high:
+                    type: number
+                    description: number of topics in this category
+                    example: 4
+              examples:
+                AudienceRelevanceExample:
+                  value:
+                    none: 1
+                    low: 2
+                    medium: 3
+                    high: 4
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      x-codeSamples:
+        - lang: 'JavaScript (React)'
+          source: >
+            import React, { useEffect, useState } from 'react';
+
+            const AudienceRelevance = () => {
+              const [data, setData] = useState(null);
+
+              useEffect(() => {
+                // Replace 'RADAR_API_URI' with one of the URI entries in the servers section
+                fetch(`${RADAR_API_URI}/topics/audienceRelevance`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error:', error));
+              }, []);
+
+              return (
+                <div>
+                  {data ? JSON.stringify(data) : 'Loading...'}
+                </div>
+              );
+            }
+
+            export default AudienceRelevance;
+  /topics/incidenceAndEngagement:
+    get:
+      tags:
+        - Topics
+      operationId: getTopicIncidenceAndEngagement
+      summary: Retrieve the Orgs topics incidence and engagement
+      parameters:
+        - in: query
+          name: filter
+          schema:
+            type: object
+            properties:
+              listId:
+                $ref: '#/components/schemas/ContactListId'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopicIncidenceAndEngagement'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      x-codeSamples:
+        - lang: 'JavaScript (React)'
+          source: >
+            import React, { useEffect, useState } from 'react';
+
+            const IncidenceAndEngagement = () => {
+              const [data, setData] = useState(null);
+
+              useEffect(() => {
+                // Replace 'RADAR_API_URI' with one of the URI entries in the servers section
+                fetch(`${RADAR_API_URI}/topics/incidenceAndEngagement`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error:', error));
+              }, []);
+
+              return (
+                <div>
+                  {data ? JSON.stringify(data) : 'Loading...'}
+                </div>
+              );
+            }
+
+            export default IncidenceAndEngagement;
+  /topics/summaries:
+    get:
+      tags:
+        - Topics
+      operationId: getTopicSummaries
+      summary: Retrieve the Orgs topics summaries
+      parameters:
+        - $ref: '#/components/parameters/PaginatableOffSetBased'
+        - $ref: '#/components/parameters/PaginatableLimitBased'
+        - $ref: '#/components/parameters/TopicsSummariesSortBy'
+        - $ref: '#/components/parameters/SortDirection'
+        - in: query
+          name: filter
+          schema:
+            type: object
+            properties:
+              topic:
+                $ref: '#/components/schemas/TopicsFilter'
+              audienceRelevance:
+                $ref: '#/components/schemas/AudienceRelevanceFilter'
+              listId:
+                $ref: '#/components/schemas/ContactListId'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItems:
+                    type: number
+                    example: 10
+                  currentOffset:
+                    type: number
+                    example: 10
+                  content:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          $ref: '#/components/schemas/ID'
+                        value:
+                          type: string
+                          example: 'Topic 1'
+                        contacts:
+                          type: number
+                          example: 10
+                        topicCompetition:
+                          type: number
+                          example: 20
+                        coverageScore:
+                          type: number
+                          example: 30
+                          minimum: 0
+                          maximum: 100
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      x-codeSamples:
+        - lang: 'JavaScript (React)'
+          source: >
+            import React, { useEffect, useState } from 'react';
+
+            const TopicSummaries = () => {
+              const [data, setData] = useState(null);
+
+              useEffect(() => {
+                // Replace 'RADAR_API_URI' with one of the URI entries in the servers section
+                fetch(`${RADAR_API_URI}/topics/summaries`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error:', error));
+              }, []);
+
+              return (
+                <div>
+                  {data ? JSON.stringify(data) : 'Loading...'}
+                </div>
+              );
+            }
+
+            export default TopicSummaries;
+
+  /contacts:
+    get:
+      tags:
+        - Contacts
+      operationId: getContacts
+      summary: Retrieve the current contacts
+      parameters:
+        - $ref: '#/components/parameters/PaginatableOffSetBased'
+        - $ref: '#/components/parameters/PaginatableLimitBased'
+        - $ref: '#/components/parameters/ContactsSortBy'
+        - $ref: '#/components/parameters/SortDirection'
+        - $ref: '#/components/parameters/ContactsFilter'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                allOf:
+                  - $ref: '#/components/schemas/FeaturePaginatableOffSetBasedMetaData'
+                  - $ref: '#/components/schemas/FeatureContactsFilteringMetaData'
+                  - type: object
+                    additionalProperties: false
+                    properties:
+                      content:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ContactsDetail'
+                        maxItems: 100
+                        minItems: 0
+              examples:
+                ContactDetailExample:
+                  value:
+                    totalItems: 50
+                    currentOffset: 10
+                    distinctValues:
+                      uniqueCompanies:
+                        - Toys R Us
+                        - Amazon
+                      uniqueIndustries:
+                        - Retail
+                        - Technology
+                      uniqueJobTitles:
+                        - CEO
+                        - CTO
+                      uniqueStages:
+                        - LEAD
+                        - OPPORTUNITY
+                      insightsCountRange:
+                        min: 0
+                        max: 100
+                    content:
+                      - id: 646ef61f0f9bade6591659c0
+                        firstName: John
+                        lastName: Doe
+                        email: johndoe@toysrus.com
+                        company: Toys R Us
+                        insights: 45
+                        recommendations: 11
+                        industry: Retail
+                        jobTitle: CEO
+                        stage: LEAD
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      x-codeSamples:
+        - lang: 'JavaScript (React)'
+          source: >
+            import React, { useEffect, useState } from 'react';
+
+            const Contacts = () => {
+              const [data, setData] = useState(null);
+
+              useEffect(() => {
+                // Replace 'RADAR_API_URI' with one of the URI entries in the servers section
+                fetch(`${RADAR_API_URI}/contacts`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error:', error));
+              }, []);
+
+              return (
+                <div>
+                  {data ? JSON.stringify(data) : 'Loading...'}
+                </div>
+              );
+            }
+
+            export default Contacts;
+
+  /radar/contentToPromote:
+    get:
+      tags:
+        -  Radar
+      operationId: getRadarContentToPromote
+      summary: Retrieve content to promote
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentToPromote'
+                maxItems: 10
+                minItems: 0
+              examples:
+                ContentToPromoteExample:
+                  value:
+                    - id: 646ef61f0f9bade6591659c0
+                      title: 'Ford is the best'
+                      imageUrl: 'https://www.example.com/ford.jpg'
+                      url: 'https://www.example.com/ford'
+                      engagementScore: 1
+                      recommendedContacts: 10
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+  /radar/topicsToWriteAbout:
+    get:
+      tags:
+        -  Radar
+      operationId: getRadarTopicsToWriteAbout
+      summary: Retrieve topics to write about
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopicToWriteAbout'
+                maxItems: 10
+                minItems: 0
+              examples:
+                TopicsToWriteAboutExample:
+                  value:
+                    - id: '65042f30e666e2cfa47aaaa3'
+                      value: 'quis dolore est'
+                      contactIncidence: 3
+                      topicIncidence: 3
+                    - id: '65042f30e666e2cfa47aaa9e'
+                      value: 'quam laudantium voluptas'
+                      contactIncidence: 4
+                      topicIncidence: 5
+                    - id: '65042f30e666e2cfa47aaaa4'
+                      value: 'eos aut ut'
+                      contactIncidence: 3
+                      topicIncidence: 5
+                    - id: '65042f30e666e2cfa47aaaa5'
+                      value: 'nostrum rem quae'
+                      contactIncidence: 1
+                      topicIncidence: 5
+                    - id: '65042f30e666e2cfa47aaaa2'
+                      value: 'ut nobis deleniti'
+                      contactIncidence: 3
+                      topicIncidence: 6
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+  /radar/topicsIncidenceAndEngagement:
+    get:
+      tags:
+        - Radar
+      operationId: getRadarTopicsIncidenceAndEngagement
+      summary: Retrieve topics incidence and engagement
+      parameters:
+        - $ref: '#/components/parameters/DateFilter'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopicIncidenceAndEngagement'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      x-codeSamples:
+        - lang: 'JavaScript (React)'
+          source: >
+            import React, { useEffect, useState } from 'react';
+
+            const IncidenceAndEngagement = () => {
+              const [data, setData] = useState(null);
+
+              useEffect(() => {
+                // Replace 'RADAR_API_URI' with one of the URI entries in the servers section
+                fetch(`${RADAR_API_URI}/radar/incidenceAndEngagement`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error:', error));
+              }, []);
+
+              return (
+                <div>
+                  {data ? JSON.stringify(data) : 'Loading...'}
+                </div>
+              );
+            }
+
+            export default IncidenceAndEngagement;
+  /radar/personalizationScore:
+    get:
+      tags:
+        - Radar
+      operationId: getRadarPersonalizationScore
+      summary: Retrieve personalization score
+      parameters:
+        - $ref: '#/components/parameters/DateFilter'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RadarPersonalizationScore'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      x-codeSamples:
+        - lang: 'JavaScript (React)'
+          source: >
+            import React, { useEffect, useState } from 'react';
+
+            const PersonalizationScore = () => {
+              const [data, setData] = useState(null);
+
+              useEffect(() => {
+                // Replace 'RADAR_API_URI' with one of the URI entries in the servers section
+                fetch(`${RADAR_API_URI}/radar/personalizationScore`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error:', error));
+              }, []);
+
+              return (
+                <div>
+                  {data ? JSON.stringify(data) : 'Loading...'}
+                </div>
+              );
+            }
+
+            export default PersonalizationScore;
+  /radar/contentInfluencedRevenue:
+    get:
+      tags:
+        - Radar
+      operationId: getRadarContentInfluencedRevenue
+      summary: Retrieve content influenced revenue
+      parameters:
+        - $ref: '#/components/parameters/DateFilter'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RadarContentInfluencedRevenue'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      x-codeSamples:
+        - lang: 'JavaScript (React)'
+          source: >
+            import React, { useEffect, useState } from 'react';
+
+            const ContentInfluencedRevenue = () => {
+              const [data, setData] = useState(null);
+
+              useEffect(() => {
+                // Replace 'RADAR_API_URI' with one of the URI entries in the servers section
+                fetch(`${RADAR_API_URI}/radar/contentInfluencedRevenue`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error:', error));
+              }, []);
+
+              return (
+                <div>
+                  {data ? JSON.stringify(data) : 'Loading...'}
+                </div>
+              );
+            }
+
+            export default ContentInfluencedRevenue;
+  /radar/newPersonalizedEngagementsScore:
+    get:
+      tags:
+        - Radar
+      operationId: getRadarNewPersonalizedEngagementsScore
+      summary: Retrieve new personalized engagements score
+      parameters:
+        - $ref: '#/components/parameters/DateFilter'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RadarNewPersonalizedEngagementsScore'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      x-codeSamples:
+        - lang: 'JavaScript (React)'
+          source: >
+            import React, { useEffect, useState } from 'react';
+
+            const NewPersonalizedEngagementsScore = () => {
+              const [data, setData] = useState(null);
+
+              useEffect(() => {
+                // Replace 'RADAR_API_URI' with one of the URI entries in the servers section
+                fetch(`${RADAR_API_URI}/radar/newPersonalizedEngagementsScore`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error:', error));
+              }, []);
+
+              return (
+                <div>
+                  {data ? JSON.stringify(data) : 'Loading...'}
+                </div>
+              );
+            }
+
+            export default NewPersonalizedEngagementsScore;
+  /radar/personalizedContentEngagementRate:
+    get:
+      tags:
+        - Radar
+      operationId: getRadarPersonalizedContentEngagementRate
+      summary: Retrieve personalized content engagement rate
+      parameters:
+        - $ref: '#/components/parameters/DateFilter'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RadarPersonalizedContentEngagementRate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      x-codeSamples:
+        - lang: 'JavaScript (React)'
+          source: >
+            import React, { useEffect, useState } from 'react';
+
+            const PersonalizedContentEngagementRate = () => {
+              const [data, setData] = useState(null);
+
+              useEffect(() => {
+                // Replace 'RADAR_API_URI' with one of the URI entries in the servers section
+                fetch(`${RADAR_API_URI}/radar/personalizedContentEngagementRate`, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error:', error));
+              }, []);
+
+              return (
+                <div>
+                  {data ? JSON.stringify(data) : 'Loading...'}
+                </div>
+              );
+            }
+
+            export default PersonalizedContentEngagementRate;
+
+components:
+  securitySchemes:
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+
+    DateFilter:
+      in: query
+      name: dateFilter
+      schema:
+        $ref: '#/components/schemas/DateRange'
+      description: Date range filter
+
+    PaginatableOffSetBased:
+      in: query
+      name: offset
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+        maximum: 100
+        format: int32
+      description: Number of items to skip.
+      example: 12
+
+    PaginatableLimitBased:
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+        format: int32
+      description: Number of items to return.
+      example: 12
+
+    ContactsSortBy:
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+          - firstName
+          - lastName
+          - email
+          - company
+          - insights
+          - recommendations
+        default: lastName
+      description: Sort by field.
+      example: lastName
+
+    TopicsSummariesSortBy:
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+          - value
+          - contacts
+          - topicCompetition
+          - coverageScore
+        default: value
+      description: Sort by field.
+      example: coverageScore
+
+    SortDirection:
+      in: query
+      name: sortDirection
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
+      description: Sort direction.
+      example: desc
+
+    ContactsFilter:
+      name: filter
+      in: query
+      required: false
+      schema:
+        type: object
+        properties:
+          # industry:
+          #   type: array
+          #   description: Industry names to filter by
+          #   items:
+          #     type: string
+          #     example: 'Automotive'
+          #     minLength: 1
+          #     maxLength: 128
+          #   minItems: 0
+          #   maxItems: 20
+          #   example: ['Automotive', 'Technology']
+          insights:
+            type: object
+            description: Insights count range to filter by
+            properties:
+              min:
+                type: integer
+                example: 1
+                minimum: 0
+                maximum: 100
+                format: int32
+              max:
+                type: integer
+                example: 100
+                minimum: 0
+                maximum: 100
+                format: int32
+            example: { min: 1, max: 100 }
+          company:
+            type: array
+            description: Company names to filter by
+            items:
+              type: string
+              example: 'Acme'
+              minLength: 1
+              maxLength: 128
+            minItems: 0
+            maxItems: 20
+            example: ['Acme', 'Globex']
+          listId:
+            description: Contact list ID to filter by
+            $ref: '#/components/schemas/ContactListId'
+
+  schemas:
+    ID:
+      type: string
+      example: 645d42381e5e42f7639def7f
+      pattern: '^[0-9a-fA-F]{24}$'
+
+    DateRange:
+      type: object
+      additionalProperties: false
+      properties:
+        from:
+          type: string
+          format: date
+          example: '2023-01-01'
+          pattern: ^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$
+          minLength: 10
+          maxLength: 10
+          x-42c-format: o:date
+        to:
+          type: string
+          format: date
+          example: '2023-01-08'
+          pattern: ^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$
+          minLength: 10
+          maxLength: 10
+          x-42c-format: o:date
+      required:
+        - from
+      description: Specific date range to filter the results. Dates should be in the ISO 8601 format 'YYYY-MM-DD'.
+      example: { from: '2023-01-01', to: '2023-01-08' }
+
+    MinInteger:
+      type: integer
+      example: 1
+      minimum: 0
+      maximum: 100
+      format: int32
+
+    MaxInteger:
+      type: integer
+      example: 100
+      minimum: 0
+      maximum: 100
+      format: int32
+
+    UniqueIndustries:
+      description: Unique industries in the result set
+      type: array
+      items:
+        type: string
+        example: Retail
+        minLength: 1
+        maxLength: 128
+      example:
+        - Retail
+        - Manufacturing
+
+    UniqueJobTitles:
+      description: Unique job titles in the result set
+      type: array
+      items:
+        type: string
+        example: CEO
+        minLength: 1
+        maxLength: 128
+      example:
+        - CEO
+        - CTO
+
+    UniqueCompanies:
+      description: Unique companies in the result set
+      type: array
+      items:
+        type: string
+        example: Ford
+        minLength: 1
+        maxLength: 128
+      example:
+        - Ford
+        - Walmart
+
+    UniqueStages:
+      description: Unique stages in the result set
+      type: array
+      items:
+        type: string
+        example: Lead
+        minLength: 1
+        maxLength: 128
+      example:
+        - Lead
+        - Customer
+
+    UniqueListIds:
+      type: array
+      description: The list ids this result set can be filtered by
+      items:
+        type: string
+        example: 'this is a list'
+
+    InsightsCountRange:
+      type: object
+      properties:
+        min:
+          $ref: '#/components/schemas/MinInteger'
+        max:
+          $ref: '#/components/schemas/MaxInteger'
+
+    FeaturePaginatableOffSetBasedMetaData:
+      type: object
+      additionalProperties: false
+      properties:
+        totalItems:
+          type: integer
+          minimum: 0
+          maximum: 100
+          format: int32
+        currentOffset:
+          type: integer
+          minimum: 0
+          maximum: 100
+          format: int32
+      required:
+        - totalItems
+        - currentOffset
+
+    FeatureContactsFilteringMetaData:
+      type: object
+      properties:
+        distinctValues:
+          type: object
+          properties:
+            uniqueCompanies:
+              $ref: '#/components/schemas/UniqueCompanies'
+            uniqueIndustries:
+              $ref: '#/components/schemas/UniqueIndustries'
+            uniqueJobTitles:
+              $ref: '#/components/schemas/UniqueJobTitles'
+            uniqueStages:
+              $ref: '#/components/schemas/UniqueStages'
+            uniqueListIds:
+              $ref: '#/components/schemas/UniqueListIds'
+            insightsCountRange:
+              $ref: '#/components/schemas/InsightsCountRange'
+
+    FieldCompetitorName:
+      type: string
+      maxLength: 128
+      pattern: ^[a-zA-Z0-9\s.,&'-]{1,256}$
+      description: Name of the competitor.
+
+    FieldCount:
+      type: integer
+      description: Count of the data items.
+      minimum: 0
+      maximum: 1000 # TODO: what is the real maximum?
+      format: int32
+
+    FieldTimestamp:
+      type: string
+      format: date-time
+      description: High precision ISO 8601 datetime format.
+      example: '2021-08-30T23:01:14.274085491+15:55'
+      pattern: >-
+          ^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:(?:[0-5][0-9]|60)(?:\.[0-9]{1,15})?(?:Z|[+\-](?:[01][0-9]|2[0-3]):[0-5][0-9])$
+      minLength: 20
+      maxLength: 38
+      x-42c-format: o:date-time
+
+    Metric:
+      type: object
+      additionalProperties: false
+      properties:
+        total:
+          $ref: '#/components/schemas/FieldCount'
+        changePercentage:
+          type: number
+          format: float
+          description: Percentage change of the metric.
+          minimum: -100
+          maximum: 100
+          example: 0.5
+
+    ApiResponseMessage:
+      type: object
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+          maxLength: 256
+          pattern: ^[a-zA-Z0-9 ,.'-]*[.]$
+
+    ContactsDetail:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+          description: The unique identifier of the Contact
+        firstName:
+          type: string
+          description: First name of the contact
+        lastName:
+          type: string
+          description: Last name of the contact
+        email:
+          type: string
+          description: Email address of the contact
+        company:
+          type: string
+          description: Company where the contact is currently employed
+        insights:
+          type: number
+          description: Number of insights the contact has
+        recommendations:
+          type: number
+          description: Number of recommendations the contact has
+        industry:
+          type: string
+          description: Industry of the contact
+        jobTitle:
+          type: string
+          description: Job title of the contact
+        stage:
+          type: string
+          description: Stage of the contact in the sales cycle
+      required:
+        -  id
+        -  firstName
+        -  lastName
+        -  email
+        -  company
+        -  insights
+        -  recommendations
+        -  industry
+        -  jobTitle
+        -  stage
+
+    Content:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+          description: The unique identifier of the Content
+        title:
+          type: string
+          description: Title of the article
+        publishDate:
+          $ref: '#/components/schemas/FieldTimestamp'
+          description: The time the article was published
+        url:
+          type: string
+          description: The URL of the article
+        imageUrl:
+          type: string
+          description: The URL of the image
+        articleType:
+          type: string
+          description: The type of article
+          enum:
+            - NEWS
+            - CONTENT
+            - WEBSITE
+        matches:
+          type: number
+          description: The number of contacts that have this content recommended but not delivered yet
+        source:
+          type: string
+          description: The source of the article
+        engagementScore:
+          type: number
+          description: The engagement score percentage of the content
+      required:
+        - id
+        - title
+        - publishDate
+        - url
+        - imageUrl
+        - articleType
+        - matches
+        - source
+        - engagementScore
+
+    ContentToPromote:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+          description: The unique identifier of the Content
+        title:
+          type: string
+          description: Title of the article
+        url:
+          type: string
+          description: The URL of the article
+        imageUrl:
+          type: string
+          description: The URL of the image
+        matches:
+          type: number
+          description: The number of contacts that have this content recommended but not delivered or seen yet
+      required:
+        -  id
+        -  title
+        -  url
+        -  imageUrl
+        -  engagementScore
+        -  recommendedContacts
+
+    RelatedContent:
+      type: object
+      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/Content'
+        - type: object
+          additionalProperties: false
+          properties:
+            matches:
+              type: number
+              description: The number of contacts matching this content
+          required:
+            -  matches
+
+    TopicToWriteAbout:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+        value:
+          type: string
+          description: The value of the topic
+        contactIncidence:
+          type: number
+          description: The number of contacts that have this topic
+        topicIncidence:
+          type: number
+          description: The number of topics that have this topic
+      required:
+        - id
+        - value
+        - contactIncidence
+        - topicIncidence
+
+    TopicIncidenceAndEngagement:
+      type: object
+      properties:
+        value:
+          type: string
+          example: 'Topic 1'
+        incidence:
+          type: number
+          example: 10
+        incidencePercentile:
+          type: number
+          example: 20
+          minimum: 0
+          maximum: 100
+        engagement:
+          type: number
+          example: 20
+        engagementPercentile:
+          type: number
+          example: 30
+          minimum: 0
+          maximum: 100
+      required:
+        -  value
+        -  incidence
+        -  incidencePercentile
+        -  engagement
+        -  engagementPercentile
+
+    RadarPersonalizationScore:
+      type: object
+      additionalProperties: false
+      properties:
+        score:
+          type: string
+          enum: ['A', 'B', 'F']
+          example: 'A'
+        changeScore:
+          type: string
+          enum: ['A', 'B', 'F']
+          example: 'A'
+      required:
+        -  score
+        -  changeScore
+
+    RadarContentInfluencedRevenue:
+      type: object
+      additionalProperties: false
+      properties:
+        revenue:
+          type: number
+          example: 1000
+        changePercentage:
+          type: number
+          example: 0.3
+          minimum: 0
+          maximum: 100
+      required:
+        -  revenue
+        -  changePercentage
+
+    RadarNewPersonalizedEngagementsScore:
+      type: object
+      properties:
+        engagements:
+          type: number
+          example: 1000
+        changePercentage:
+          type: number
+          example: 0.3
+          minimum: 0
+          maximum: 100
+
+    RadarPersonalizedContentEngagementRate:
+      type: object
+      properties:
+        engagementRate:
+          type: number
+          example: 100
+        changePercentage:
+          type: number
+          example: 0.3
+          minimum: 0
+          maximum: 100
+
+    TopicsFilter:
+      type: array
+      description: Topics to filter by
+      items:
+        type: string
+        example: 'income tax'
+        minLength: 1
+        maxLength: 128
+      minItems: 0
+      maxItems: 10
+      example: [ 'income tax', 'other stuff' ]
+
+    AudienceRelevanceFilter:
+      type: array
+      description: Audience Relevance to filter by
+      items:
+        type: string
+        enum: [ 'NONE', 'LOW', 'MEDIUM', 'HIGH' ]
+        example: 'LOW'
+      minItems: 0
+      maxItems: 4
+      example: [ 'NONE', 'LOW' ]
+
+    HubspotSettingsIntegration:
+      title: Hubspot
+      allOf:
+        - $ref: '#/components/schemas/SettingsIntegration'
+        - type: object
+          properties:
+            availableContactLists:
+              allOf:
+                - $ref: '#/components/schemas/ContactLists'
+                - description: The list IDs of the available contact lists
+        - type: object
+          oneOf:
+            - type: object
+              properties:
+                contactLists:
+                  allOf:
+                    - $ref: '#/components/schemas/ContactLists'
+                    - description: The contact lists of the integration (CRMs only)
+              required: ['contactLists']
+            - type: object
+              properties:
+                syncAllContacts:
+                  type: boolean
+                  description: Whether to sync all contacts
+              required: ['syncAllContacts']
+      example:
+        listId: 645d42381e5e42f7639def7f
+        type: HUBSPOT
+        connected: true
+        contactLists:
+          - listId: 10
+            name: List 1
+          - listId: 11
+            name: List 2
+        syncAllContacts: true
+        membershipListIds:
+          - listId: 10
+            name: List 1
+          - listId: 11
+            name: List 2
+
+    PardotSettingsIntegration:
+      title: Pardot
+      allOf:
+        -  $ref: '#/components/schemas/SettingsIntegration'
+        - type: object
+          properties:
+            businessUnitId:
+              type: string
+              description: The business unit of the integration
+      example:
+        id: 645d42381e5e42f7639def7f
+        type: PARDOT
+        connected: true
+        businessUnitId: 645d42381e5e42f7639def7f
+
+    MarketoSettingsIntegration:
+      title: Marketo
+      allOf:
+        -  $ref: '#/components/schemas/SettingsIntegration'
+      example:
+        id: 645d42381e5e42f7639def7f
+        type: MARKETO
+        connected: true
+
+    GoogleAnalyticsSettingsIntegration:
+      title: Google Analytics
+      allOf:
+        -  $ref: '#/components/schemas/SettingsIntegration'
+        - type: object
+          properties:
+            propertyId:
+              type: string
+              description: The property ID of the integration
+      example:
+        id: 645d42381e5e42f7639def7f
+        type: GOOGLE_ANALYTICS
+        connected: true
+        propertyId: 645d42381e5e42f7639def7f
+
+    SettingsIntegration:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ID'
+          description: The unique identifier of the integration
+        type:
+          type: string
+          description: The type of the integration
+          enum:
+            - HUBSPOT
+            - PARDOT
+            - MARKETO
+            - GOOGLE_ANALYTICS
+        connected:
+          type: boolean
+          description: Whether the integration is connected
+      required:
+        - id
+        - type
+        - connected
+
+    ContactListId:
+      type: string
+      description: The unique identifier of the contact list
+
+    ContactLists:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          listId:
+            $ref: '#/components/schemas/ContactListId'
+          name:
+            type: string
+            description: The name of the contact list
+
+    CompetitorDetails:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Acme'
+        websiteURL:
+          type: string
+          example: 'https://www.acme.com'
+        linkedinSlug:
+          type: string
+          example: 'acme'
+      required:
+        - name
+        - websiteURL
+        - linkedinSlug
+
+  responses:
+
+    BadRequest:
+      description: The server could not understand the request due to invalid syntax.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'Invalid request parameters.'
+
+    Unauthorized:
+      description: The client must authenticate itself to get the requested response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'Authentication is required to access this resource.'
+
+    Forbidden:
+      description: The client does not have access rights to the content.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'You do not have the necessary permissions to access this resource.'
+
+    NotFound:
+      description: The server can not find the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'Resource not found.'
+
+    NotAcceptable:
+      description: The server cannot produce a response matching the list of acceptable values defined in the request's headers.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'Requested format not acceptable.'
+
+    Conflict:
+      description: The request could not be completed due to a conflict with the current state of the resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'Conflict with the current state of the resource.'
+
+    UnprocessableEntity:
+      description: The server understands the content type of the request entity, and the syntax of the request entity is correct, but it was unable to process the contained instructions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'Unable to process the contained instructions'
+
+    TooManyRequests:
+      description: The user has sent too many requests in a given amount of time.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'Rate limit exceeded. Please try again later.'
+
+    InternalServerError:
+      description: The server has encountered a situation it doesn't know how to handle.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'An unexpected error has occurred.'
+
+    Error:
+      description: An unexpected error has occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseMessage'
+          example:
+            message: 'An unexpected error has occurred.'
