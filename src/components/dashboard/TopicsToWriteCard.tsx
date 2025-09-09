@@ -11,6 +11,7 @@ import {
   Typography,
   Box,
 } from "@mui/material";
+import React from "react";
 
 interface TopicItem {
   topic: string;
@@ -42,7 +43,7 @@ export default function TopicsToWriteCard({ topics }: TopicsToWriteProps) {
         </TableHead>
 
         <TableBody>
-          {topics.map((row, index) => (
+          {(topics || []).map((row, index) => (
             <TableRow key={index}>
               <TableCell sx={{ py: 1.5 }}>
                 <Typography variant="body2">{row.topic}</Typography>

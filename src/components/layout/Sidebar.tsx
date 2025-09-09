@@ -29,6 +29,7 @@ import WifiIcon from "@mui/icons-material/Wifi";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import GroupIcon from "@mui/icons-material/Group";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import React from "react";
 
 const navItems = [
   { label: "Radar", path: "/radar", icon: <WifiIcon /> },
@@ -145,7 +146,11 @@ export default function Sidebar({
               const isUpgrade = item.path === "/upgrade";
 
               return (
-                <Link key={item.path} href={item.path} passHref legacyBehavior>
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  style={{ textDecoration: "none" }}
+                >
                   <ListItemButton
                     selected={isSelected && !isUpgrade}
                     sx={{

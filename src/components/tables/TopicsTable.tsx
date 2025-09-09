@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useTopics } from "../../hooks/useRadar";
+import React from "react";
 
 // Helper: map score → label + color
 function getCoverage(score: number) {
@@ -40,7 +41,7 @@ export default function TopicsTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.content.map((row: any) => {
+          {(Array.isArray(data) ? data : data.content || []).map((row: any) => {
             const coverage = getCoverage(row.coverageScore);
 
             return (

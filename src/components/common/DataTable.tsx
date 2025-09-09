@@ -11,6 +11,7 @@ import {
   Typography,
   Box,
 } from "@mui/material";
+import React from "react";
 
 interface Column {
   key: string;
@@ -43,7 +44,7 @@ export default function DataTable({ title, columns, rows }: DataTableProps) {
                   background: "#f6f7fa",
                 }}
               >
-                {columns.map((col) => (
+                {(columns || []).map((col) => (
                   <TableCell
                     key={col.key}
                     sx={{
@@ -61,14 +62,14 @@ export default function DataTable({ title, columns, rows }: DataTableProps) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, i) => (
+              {(rows || []).map((row, i) => (
                 <TableRow
                   key={i}
                   sx={{
                     background: "#fff",
                   }}
                 >
-                  {columns.map((col) => (
+                  {(columns || []).map((col) => (
                     <TableCell
                       key={col.key}
                       sx={{

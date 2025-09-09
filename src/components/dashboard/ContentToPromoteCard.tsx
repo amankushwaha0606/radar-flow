@@ -12,6 +12,7 @@ import {
   Box,
   Avatar,
 } from "@mui/material";
+import React from "react";
 
 interface ContentItem {
   title: string;
@@ -43,7 +44,7 @@ export default function ContentToPromoteCard({ items }: ContentToPromoteProps) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {items.map((row, index) => (
+          {(items || []).map((row, index) => (
             <TableRow key={index}>
               <TableCell
                 sx={{ py: 1.5, display: "flex", alignItems: "center" }}

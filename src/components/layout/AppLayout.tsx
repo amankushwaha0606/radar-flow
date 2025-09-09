@@ -5,6 +5,7 @@ import { Box } from "@mui/material";
 import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import React from "react";
 
 const drawerWidth = 240;
 const appBarHeight = 72;

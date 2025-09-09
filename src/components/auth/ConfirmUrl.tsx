@@ -11,13 +11,14 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import otpBackground from "../../../public/otp-background.png";
+import React from "react";
 
 export default function ConfirmUrl() {
   const router = useRouter();
   const [url, setUrl] = useState("https://www.examplecompany.com");
 
   const onContinue = () => {
-    // Normally validate + call API (not required for mock)
+    // Validate URL and proceed to next step
     router.push("/auth/welcome-screen");
   };
 

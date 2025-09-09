@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { useContacts } from "../../hooks/useRadar";
+import React from "react";
 
 export default function ContactsTable() {
   const { data, isLoading, error } = useContacts();
@@ -30,7 +31,7 @@ export default function ContactsTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.content.map((row: any) => (
+          {(Array.isArray(data) ? data : data.content || []).map((row: any) => (
             <TableRow key={row.id}>
               <TableCell sx={{ py: 1.5, px: 2 }}>{row.firstName}</TableCell>
               <TableCell sx={{ py: 1.5, px: 2 }}>{row.lastName}</TableCell>

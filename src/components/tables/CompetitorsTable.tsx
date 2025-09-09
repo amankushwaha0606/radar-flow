@@ -21,6 +21,7 @@ import {
   useAddCompetitor,
 } from "../../hooks/useRadar";
 import { useQueryClient } from "@tanstack/react-query";
+import React from "react";
 
 type Row = {
   id?: string;
@@ -39,16 +40,20 @@ export default function CompetitorsTable() {
 
   // initialize editable rows when data loads
   if (!isLoading && data && rows.length === 0) {
-    setRows(data);
+    // Handle both formats: direct array or object with content property
+    const competitorsData = Array.isArray(data) ? data : data.content || [];
+    setRows(competitorsData);
   }
 
   if (isLoading) return <Paper sx={{ p: 3 }}>Loading competitors…</Paper>;
   if (error) return <Paper sx={{ p: 3 }}>Failed to load competitors</Paper>;
+  if (!data || rows.length === 0)
+    return <Paper sx={{ p: 3 }}>No competitors data available</Paper>;
 
   const onSave = async (id: string) => {
     const row = rows.find((r) => r.id === id);
     if (!row) return;
-    await updateMut.mutateAsync([id, row] as any);
+    await updateMut.mutateAsync([id, row]);
     setEditing(null);
     qc.invalidateQueries({ queryKey: ["competitors"] });
   };
@@ -70,7 +75,7 @@ export default function CompetitorsTable() {
         Aenean pharetra lacus nec interdum viverra.
       </Typography>
       <Typography variant="h6" fontWeight={500}>
-        Your Selected Competiors
+        Your Selected Competitors
       </Typography>
       <TableContainer component={Paper}>
         <Table size="small">
@@ -83,7 +88,7 @@ export default function CompetitorsTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {(rows || []).map((row) => (
               <TableRow key={row.id}>
                 <TableCell>
                   {editing === row.id ? (

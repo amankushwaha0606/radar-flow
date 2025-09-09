@@ -14,6 +14,7 @@ import {
 import { createAccount } from "../../api/radar";
 import { useRouter } from "next/navigation";
 import accountCreation from "../../../public/account-creation.png";
+import React from "react";
 
 export default function CreateAccount() {
   const router = useRouter();

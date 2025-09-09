@@ -4,6 +4,7 @@ import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import videoThumbnail from "../../../public/welcome-video.png";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 export default function WelcomeScreen() {
   const router = useRouter();

@@ -12,6 +12,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { usePathname } from "next/navigation";
 import ProgressCard from "../dashboard/ProgressCard";
 import { useState } from "react";
+import React from "react";
 
 function getTitle(path: string) {
   if (path.startsWith("/topics")) return "Topics";

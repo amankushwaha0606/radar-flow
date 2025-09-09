@@ -14,6 +14,7 @@ import {
 import { login } from "../../api/radar";
 import { useRouter, useSearchParams } from "next/navigation";
 import otpBackground from "../../../public/otp-background.png";
+import React from "react";
 
 export default function SignIn() {
   const router = useRouter();
