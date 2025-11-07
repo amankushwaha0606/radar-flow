@@ -2,6 +2,17 @@
 
 This instance showcases the Radar Lite components with comprehensive examples and interactive storybook documentation.
 
+---
+
+## Demo
+
+Live demo: [https://radar-flow.vercel.app/](https://radar-flow.vercel.app/)
+
+
+From the initial screen, click on Sign In on the top right
+
+---
+
 ## 🚀 Getting Started
 
 For app running (default port 3000)
